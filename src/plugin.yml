@@ -1,0 +1,7 @@
+name: MyHome
+version: 1.8
+main: me.taylorkelly.myhome.MyHome
+commands:
+  home:
+    description: All of the MyHome commands
+    usage: /<command> help - Displays the MyHome commands
