@@ -17,8 +17,11 @@ public class Converter {
     public static void convert(Player player, Server server, HomeList lister) {
         File file = new File("homes.txt");
         PreparedStatement ps = null;
+        Connection conn;
         try {
-            Connection conn = ConnectionManager.getConnection();
+            Class.forName("org.sqlite.JDBC");
+            conn = DriverManager.getConnection(WarpDataSource.DATABASE);
+            conn.setAutoCommit(false);
             ps = conn
                     .prepareStatement("INSERT INTO homeTable (id, name, world, x, y, z, yaw, pitch, publicAll, permissions, welcomeMessage) VALUES (?,?,?,?,?,?,?,?,?,?,?)");
 
@@ -44,14 +47,14 @@ public class Converter {
 
                     yaw = (yaw < 0) ? (360 + (yaw % 360)) : (yaw % 360);
 
-                    World world = server.getWorlds()[0];
+                    World world = server.getWorlds().get(0);
                     Location location = new Location(world, x, y, z, (float) yaw, (float) pitch);
                     Home warp = new Home(name, location);
                     lister.blindAdd(warp);
 
                     ps.setInt(1, warp.index);
                     ps.setString(2, warp.name);
-                    ps.setInt(3, warp.world);
+                    ps.setString(3, warp.world);
                     ps.setDouble(4, warp.x);
                     ps.setInt(5, warp.y);
                     ps.setDouble(6, warp.z);
@@ -77,6 +80,8 @@ public class Converter {
             player.sendMessage(ChatColor.RED + "Error: 'homes.txt' doesn't exist.");
         } catch (SQLException e) {
             player.sendMessage(ChatColor.RED + "Error: SQLite Exception");
+        } catch (ClassNotFoundException e) {
+            player.sendMessage(ChatColor.RED + "Error: You need the SQLite Library");
         } finally {
             try {
                 if (ps != null) {

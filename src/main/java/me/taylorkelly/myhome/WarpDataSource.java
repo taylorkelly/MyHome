@@ -11,6 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class WarpDataSource {
+
     public final static String DATABASE = "jdbc:sqlite:homes-warps.db";
     private final static String HOME_TABLE = "CREATE TABLE `homeTable` (" + "`id` INTEGER PRIMARY KEY," + "`name` varchar(32) NOT NULL DEFAULT 'Player',"
             + "`world` tinyint NOT NULL DEFAULT '0'," + "`x` DOUBLE NOT NULL DEFAULT '0'," + "`y` tinyint NOT NULL DEFAULT '0',"
@@ -39,7 +40,7 @@ public class WarpDataSource {
                 size++;
                 int index = set.getInt("id");
                 String name = set.getString("name");
-                int world = set.getInt("world");
+                String world = set.getString("world");
                 double x = set.getDouble("x");
                 int y = set.getInt("y");
                 double z = set.getDouble("z");
@@ -56,10 +57,12 @@ public class WarpDataSource {
             log.log(Level.SEVERE, "[MYHOME]: Home Load Exception");
         } finally {
             try {
-                if (statement != null)
+                if (statement != null) {
                     statement.close();
-                if (set != null)
+                }
+                if (set != null) {
                     set.close();
+                }
             } catch (SQLException ex) {
                 log.log(Level.SEVERE, "[MYHOME]: Home Load Exception (on close)");
             }
@@ -73,8 +76,9 @@ public class WarpDataSource {
             Connection conn = ConnectionManager.getConnection();
             DatabaseMetaData dbm = conn.getMetaData();
             rs = dbm.getTables(null, null, "homeTable", null);
-            if (!rs.next())
+            if (!rs.next()) {
                 return false;
+            }
             return true;
         } catch (SQLException ex) {
             Logger log = Logger.getLogger("Minecraft");
@@ -82,8 +86,9 @@ public class WarpDataSource {
             return false;
         } finally {
             try {
-                if (rs != null)
+                if (rs != null) {
                     rs.close();
+                }
             } catch (SQLException ex) {
                 Logger log = Logger.getLogger("Minecraft");
                 log.log(Level.SEVERE, "[MYHOME]: Table Check SQL Exception (on closing)");
@@ -103,8 +108,9 @@ public class WarpDataSource {
             log.log(Level.SEVERE, "[MYHOME]: Create Table Exception", e);
         } finally {
             try {
-                if (st != null)
+                if (st != null) {
                     st.close();
+                }
             } catch (SQLException e) {
                 Logger log = Logger.getLogger("Minecraft");
                 log.log(Level.SEVERE, "[MYHOME]: Could not create the table (on close)");
@@ -118,11 +124,10 @@ public class WarpDataSource {
         try {
             Connection conn = ConnectionManager.getConnection();
 
-            ps = conn
-                    .prepareStatement("INSERT INTO homeTable (id, name, world, x, y, z, yaw, pitch, publicAll, permissions, welcomeMessage) VALUES (?,?,?,?,?,?,?,?,?,?,?)");
+            ps = conn.prepareStatement("INSERT INTO homeTable (id, name, world, x, y, z, yaw, pitch, publicAll, permissions, welcomeMessage) VALUES (?,?,?,?,?,?,?,?,?,?,?)");
             ps.setInt(1, warp.index);
             ps.setString(2, warp.name);
-            ps.setInt(3, warp.world);
+            ps.setString(3, warp.world);
             ps.setDouble(4, warp.x);
             ps.setInt(5, warp.y);
             ps.setDouble(6, warp.z);
@@ -233,11 +238,14 @@ public class WarpDataSource {
         Logger log = Logger.getLogger("Minecraft");
         try {
             Connection conn = ConnectionManager.getConnection();
-            ps = conn.prepareStatement("UPDATE homeTable SET x = ?, y = ?, z = ? WHERE id = ?");
+            ps = conn.prepareStatement("UPDATE homeTable SET x = ?, y = ?, z = ?, world = ?, yaw = ?, pitch = ? WHERE id = ?");
             ps.setDouble(1, warp.x);
             ps.setInt(2, warp.y);
             ps.setDouble(3, warp.z);
-            ps.setInt(4, warp.index);
+            ps.setString(4, warp.world);
+            ps.setInt(5, warp.yaw);
+            ps.setDouble(6, warp.pitch);
+            ps.setInt(7, warp.index);
             ps.executeUpdate();
             conn.commit();
         } catch (SQLException ex) {
@@ -255,5 +263,4 @@ public class WarpDataSource {
             }
         }
     }
-
 }

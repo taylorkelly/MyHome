@@ -1,6 +1,9 @@
 package me.taylorkelly.myhome;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -16,79 +19,120 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.Event.Priority;
-import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginLoader;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class MyHome extends JavaPlugin {
+
     private MHEntityListener entityListener;
     private MHPlayerListener playerListener;
     private HomeList homeList;
     private boolean warning = false;
-
     public final String name = this.getDescription().getName();
     public final String version = this.getDescription().getVersion();
-
     private Updater updater;
+    public static final Logger log = Logger.getLogger("Minecraft");
 
-    public MyHome(PluginLoader pluginLoader, Server instance, PluginDescriptionFile desc, File folder, File plugin, ClassLoader cLoader) {
-        super(pluginLoader, instance, desc, folder, plugin, cLoader);
-        updater = new Updater();
 
-    }
-
+    @Override
     public void onDisable() {
-        ConnectionManager.freeConnection();
     }
 
+    @Override
     public void onEnable() {
-        Logger log = Logger.getLogger("Minecraft");
 
+        updater = new Updater();
         try {
             updater.check();
             updater.update();
         } catch (Exception e) {
-            e.printStackTrace();
         }
 
-        Connection conn = ConnectionManager.initializeConnection(getServer());
+
+        File newDatabase = new File(getDataFolder(), "homes.db");
+        File oldDatabase = new File("homes-warps.db");
+        if (!newDatabase.exists() && oldDatabase.exists()) {
+            updateFiles(oldDatabase, newDatabase);
+        }
+
+        Connection conn = ConnectionManager.initialize(this.getDataFolder());
         if (conn == null) {
-            log = Logger.getLogger("Minecraft");
-            log.log(Level.SEVERE, "[MYHOME] Could not establish SQL connection. Disabling MyHome");
+            severe("Could not establish SQL connection. Disabling MyHome");
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
 
-        if (new File("MyWarp").exists() && new File("MyWarp", "warps.db").exists()) {
-            updateFiles();
-        }
 
         homeList = new HomeList(getServer());
-        playerListener = new MHPlayerListener(homeList);
+        playerListener = new MHPlayerListener(homeList, getServer());
         entityListener = new MHEntityListener(homeList);
 
         HomePermissions.initialize(getServer());
         HomeSettings.initialize(getDataFolder());
 
         getServer().getPluginManager().registerEvent(Event.Type.PLAYER_JOIN, playerListener, Priority.Monitor, this);
+        getServer().getPluginManager().registerEvent(Event.Type.PLAYER_RESPAWN, playerListener, Priority.Monitor, this);
 
         log.info(name + " " + version + " enabled");
     }
 
-    private void updateFiles() {
-        File file = new File("MyWarp", "warps.db");
-        File folder = new File("MyWarp");
-        file.renameTo(new File("homes-warps.db"));
-        folder.delete();
+    private void updateFiles(File oldDatabase, File newDatabase) {
+        if (!getDataFolder().exists()) {
+            getDataFolder().mkdirs();
+        }
+        if (newDatabase.exists()) {
+            newDatabase.delete();
+        }
+        try {
+            newDatabase.createNewFile();
+        } catch (IOException ex) {
+            severe("Could not create new database file", ex);
+        }
+        copyFile(oldDatabase, newDatabase);
     }
 
+    /**
+     * File copier from xZise
+     * @param fromFile
+     * @param toFile
+     */
+    private static void copyFile(File fromFile, File toFile) {
+        FileInputStream from = null;
+        FileOutputStream to = null;
+        try {
+            from = new FileInputStream(fromFile);
+            to = new FileOutputStream(toFile);
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+
+            while ((bytesRead = from.read(buffer)) != -1) {
+                to.write(buffer, 0, bytesRead);
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(MyHome.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (from != null) {
+                try {
+                    from.close();
+                } catch (IOException e) {
+                }
+            }
+            if (to != null) {
+                try {
+                    to.close();
+                } catch (IOException e) {
+                }
+            }
+        }
+    }
+
+    @Override
     public boolean onCommand(CommandSender sender, Command command, String commandLabel, String[] args) {
         String[] split = args;
         String commandName = command.getName().toLowerCase();
-
         if (sender instanceof Player) {
-            Player player = (Player)sender;
+            Player player = (Player) sender;
             if (commandName.equals("home")) {
                 /**
                  * /home
@@ -201,8 +245,8 @@ public class MyHome extends JavaPlugin {
                     }
                 } else if (split.length == 1 && HomePermissions.homeOthers(player)) {
                     // TODO ChunkLoading
-                    String name = split[0];
-                    homeList.warpTo(name, player);
+                    String playerName = split[0];
+                    homeList.warpTo(playerName, player);
                 } else {
                     return false;
                 }
@@ -218,7 +262,12 @@ public class MyHome extends JavaPlugin {
         }
     }
 
-    public static Connection getConnection() {
-        return ConnectionManager.getConnection();
+    public static void severe(String string, Exception ex) {
+        log.log(Level.SEVERE, "[MYHOME]" + string, ex);
+
+    }
+
+    public static void severe(String string) {
+        log.log(Level.SEVERE, "[MYHOME]" + string);
     }
 }

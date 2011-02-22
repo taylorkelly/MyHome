@@ -13,6 +13,7 @@ import org.bukkit.*;
 import org.bukkit.entity.Player;
 
 public class HomeList {
+
     private HashMap<String, Home> homeList;
     private Server server;
 
@@ -52,7 +53,7 @@ public class HomeList {
             Home warp = homeList.get(name);
             if (warp.playerCanWarp(player)) {
                 if (CoolDown.playerHasCooled(player)) {
-                    WarmUp.addPlayer(player, warp);
+                    WarmUp.addPlayer(player, warp, server);
                     CoolDown.addPlayer(player);
                 } else {
                     player.sendMessage(ChatColor.RED + "You need to wait for the cooldown of " + HomeSettings.coolDown + " secs");
@@ -68,7 +69,7 @@ public class HomeList {
     public void sendPlayerHome(Player player) {
         if (homeList.containsKey(player.getName())) {
             if (CoolDown.playerHasCooled(player)) {
-                WarmUp.addPlayer(player, homeList.get(player.getName()));
+                WarmUp.addPlayer(player, homeList.get(player.getName()), server);
                 CoolDown.addPlayer(player);
             } else {
                 player.sendMessage(ChatColor.RED + "You need to wait for the cooldown of " + HomeSettings.coolDown + " secs");
@@ -245,14 +246,18 @@ public class HomeList {
         }
         return new MatchList(exactMatches, matches);
     }
+
+    public Home getHomeFor(Player player) {
+        return homeList.get(player.getName());
+    }
 }
 
 class MatchList {
+
     public MatchList(ArrayList<Home> exactMatches, ArrayList<Home> matches) {
         this.exactMatches = exactMatches;
         this.matches = matches;
     }
-
     public ArrayList<Home> exactMatches;
     public ArrayList<Home> matches;
 
