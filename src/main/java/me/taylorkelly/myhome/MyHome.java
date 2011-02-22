@@ -29,8 +29,8 @@ public class MyHome extends JavaPlugin {
     private MHPlayerListener playerListener;
     private HomeList homeList;
     private boolean warning = false;
-    public final String name = this.getDescription().getName();
-    public final String version = this.getDescription().getVersion();
+    public String name;
+    public String version;
     private Updater updater;
     public static final Logger log = Logger.getLogger("Minecraft");
 
@@ -41,6 +41,8 @@ public class MyHome extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        name = this.getDescription().getName();
+        version = this.getDescription().getVersion();
 
         updater = new Updater();
         try {
