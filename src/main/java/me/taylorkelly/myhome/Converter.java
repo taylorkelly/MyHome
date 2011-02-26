@@ -18,15 +18,15 @@ public class Converter {
         Connection conn;
         try {
             conn = ConnectionManager.getConnection();
-            ps = conn
-                    .prepareStatement("INSERT INTO homeTable (id, name, world, x, y, z, yaw, pitch, publicAll, permissions, welcomeMessage) VALUES (?,?,?,?,?,?,?,?,?,?,?)");
+            ps = conn.prepareStatement("INSERT INTO homeTable (id, name, world, x, y, z, yaw, pitch, publicAll, permissions, welcomeMessage) VALUES (?,?,?,?,?,?,?,?,?,?,?)");
 
             Scanner scanner = new Scanner(file);
             int size = 0;
             while (scanner.hasNext()) {
                 String line = scanner.nextLine();
-                if (line.equals(""))
+                if (line.equals("")) {
                     continue;
+                }
                 String[] pieces = line.split(":");
                 if (pieces.length == 6) {
                     String name = pieces[0];
@@ -86,5 +86,4 @@ public class Converter {
             }
         }
     }
-
 }
