@@ -3,11 +3,9 @@ package me.taylorkelly.myhome;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Scanner;
-import java.util.logging.Level;
 
 import org.bukkit.*;
 import org.bukkit.entity.Player;
@@ -19,9 +17,7 @@ public class Converter {
         PreparedStatement ps = null;
         Connection conn;
         try {
-            Class.forName("org.sqlite.JDBC");
-            conn = DriverManager.getConnection(WarpDataSource.DATABASE);
-            conn.setAutoCommit(false);
+            conn = ConnectionManager.getConnection();
             ps = conn
                     .prepareStatement("INSERT INTO homeTable (id, name, world, x, y, z, yaw, pitch, publicAll, permissions, welcomeMessage) VALUES (?,?,?,?,?,?,?,?,?,?,?)");
 
@@ -80,8 +76,6 @@ public class Converter {
             player.sendMessage(ChatColor.RED + "Error: 'homes.txt' doesn't exist.");
         } catch (SQLException e) {
             player.sendMessage(ChatColor.RED + "Error: SQLite Exception");
-        } catch (ClassNotFoundException e) {
-            player.sendMessage(ChatColor.RED + "Error: You need the SQLite Library");
         } finally {
             try {
                 if (ps != null) {
