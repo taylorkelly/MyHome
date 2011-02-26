@@ -12,6 +12,7 @@ public class HomeSettings {
     public static boolean coolDownNotify;
     public static int warmUp;
     public static boolean warmUpNotify;
+    public static boolean respawnToHome;
 
     public static void initialize(File dataFolder) {
         if(!dataFolder.exists()) {
@@ -25,7 +26,7 @@ public class HomeSettings {
         warmUp = file.getInt("warmUp", 0, "The number of seconds after a user uses a home command before it takes them");
         coolDownNotify = file.getBoolean("coolDownNotify", false, "Whether or not players will be notified after they've cooled down");
         warmUpNotify = file.getBoolean("warmUpNotify", true, "Whether or not players will be notified after they've warmed up");
-
+        respawnToHome = file.getBoolean("respawnToHome", true, "Whether or not players will respawn to their homes (false means to global spawn)");
         file.save();
     }
 }

@@ -37,6 +37,7 @@ public class MyHome extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        ConnectionManager.closeConnection();
     }
 
     @Override

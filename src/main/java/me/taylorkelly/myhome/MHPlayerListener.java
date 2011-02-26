@@ -25,13 +25,12 @@ public class MHPlayerListener extends PlayerListener {
 
     @Override
     public void onPlayerRespawn(PlayerRespawnEvent event) {
-        if (homeList.homeExists(event.getPlayer().getName())) {
+        if (HomeSettings.respawnToHome && homeList.homeExists(event.getPlayer().getName())) {
             Location location = homeList.getHomeFor(event.getPlayer()).getLocation(server);
             if (location != null) {
                 event.setRespawnLocation(location);
                 homeList.orientPlayer(event.getPlayer());
             }
-
         }
     }
 }
