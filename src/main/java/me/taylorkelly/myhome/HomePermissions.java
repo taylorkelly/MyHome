@@ -1,4 +1,3 @@
-
 package me.taylorkelly.myhome;
 import java.util.logging.Level;
 import java.util.logging.Logger;

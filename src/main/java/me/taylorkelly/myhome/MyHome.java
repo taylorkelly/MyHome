@@ -72,6 +72,7 @@ public class MyHome extends JavaPlugin {
         entityListener = new MHEntityListener(homeList);
 
         HomePermissions.initialize(getServer());
+        HomeHelp.initialize(this);
         HomeSettings.initialize(getDataFolder());
 
         getServer().getPluginManager().registerEvent(Event.Type.PLAYER_JOIN, playerListener, Priority.Monitor, this);
