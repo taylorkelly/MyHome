@@ -23,7 +23,6 @@ class HomeHelp {
             helpPlugin.registerCommand("home help", "Help for all /home commands", plugin, true);
             helpPlugin.registerCommand("home", "Go home young chap!", plugin, "myhome.home.basic.home");
             helpPlugin.registerCommand("home set", "Set your home", plugin, "myhome.home.basic.set");
-
             helpPlugin.registerCommand("home [player]", "Go to [player]'s home", plugin, "myhome.home.soc.others");
             helpPlugin.registerCommand("home invite [player]", "Invite [player] to your home", plugin, "myhome.home.soc.invite");
             helpPlugin.registerCommand("home uninvite [player]", "Uninvite [player] to your home", plugin, "myhome.home.soc.uninvite");

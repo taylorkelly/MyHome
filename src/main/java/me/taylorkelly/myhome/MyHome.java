@@ -13,14 +13,11 @@ import me.taylorkelly.myhome.griefcraft.Updater;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.Event.Priority;
-import org.bukkit.plugin.PluginDescriptionFile;
-import org.bukkit.plugin.PluginLoader;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class MyHome extends JavaPlugin {
@@ -33,7 +30,6 @@ public class MyHome extends JavaPlugin {
     public String version;
     private Updater updater;
     public static final Logger log = Logger.getLogger("Minecraft");
-
 
     @Override
     public void onDisable() {
@@ -192,6 +188,11 @@ public class MyHome extends JavaPlugin {
                 } else if (split.length == 1 && split[0].equalsIgnoreCase("public") && HomePermissions.canPublic(player)) {
                     homeList.publicize(player);
                     /**
+                     * /home point
+                     */
+                } else if (split.length == 1 && split[0].equalsIgnoreCase("point") && HomeSettings.compassPointer) {
+                    homeList.orientPlayer(player);
+                    /**
                      * /home invite <player>
                      */
                 } else if (split.length == 2 && split[0].equalsIgnoreCase("invite") && HomePermissions.invite(player)) {
@@ -223,7 +224,7 @@ public class MyHome extends JavaPlugin {
                         messages.add(ChatColor.RED + "/home delete" + ChatColor.WHITE + "  -  Deletes your current home");
                     }
                     if (HomePermissions.homeOthers(player)) {
-                        messages.add(ChatColor.RED + "/home <player>" + ChatColor.WHITE + "  -  Go to " + ChatColor.GRAY + "<player>" + ChatColor.WHITE
+                        messages.add(ChatColor.RED + "/home [player]" + ChatColor.WHITE + "  -  Go to " + ChatColor.GRAY + "[player]" + ChatColor.WHITE
                                 + "'s house (if allowed)");
                     }
                     if (HomePermissions.list(player)) {
@@ -231,11 +232,11 @@ public class MyHome extends JavaPlugin {
                         messages.add(ChatColor.RED + "/home ilist" + ChatColor.WHITE + "  -  List the people invited to your home");
                     }
                     if (HomePermissions.invite(player)) {
-                        messages.add(ChatColor.RED + "/home invite <player>" + ChatColor.WHITE + "  -  Invite " + ChatColor.GRAY + "<player>" + ChatColor.WHITE
+                        messages.add(ChatColor.RED + "/home invite [player]" + ChatColor.WHITE + "  -  Invite " + ChatColor.GRAY + "[player]" + ChatColor.WHITE
                                 + " to your house");
                     }
                     if (HomePermissions.uninvite(player)) {
-                        messages.add(ChatColor.RED + "/home uninvite <player>" + ChatColor.WHITE + "  -  Uninvite " + ChatColor.GRAY + "<player>"
+                        messages.add(ChatColor.RED + "/home uninvite [player]" + ChatColor.WHITE + "  -  Uninvite " + ChatColor.GRAY + "[player]"
                                 + ChatColor.WHITE + " to your house");
                     }
                     if (HomePermissions.canPublic(player)) {
@@ -243,6 +244,9 @@ public class MyHome extends JavaPlugin {
                     }
                     if (HomePermissions.canPrivate(player)) {
                         messages.add(ChatColor.RED + "/home private" + ChatColor.WHITE + "  -  Makes your house private");
+                    }
+                    if (HomeSettings.compassPointer) {
+                        messages.add(ChatColor.RED + "/home point" + ChatColor.WHITE + "  -  Points your compass home");
                     }
                     for (String message : messages) {
                         player.sendMessage(message);
