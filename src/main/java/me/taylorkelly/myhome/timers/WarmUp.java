@@ -3,6 +3,7 @@ package me.taylorkelly.myhome.timers;
 import java.util.HashMap;
 
 import me.taylorkelly.myhome.Home;
+import me.taylorkelly.myhome.HomePermissions;
 import me.taylorkelly.myhome.HomeSettings;
 
 import org.bukkit.ChatColor;
@@ -14,6 +15,11 @@ public class WarmUp {
     private static HashMap<String, Integer> players = new HashMap<String, Integer>();
 
     public static void addPlayer(Player player, Home home, Plugin plugin) {
+        if (!HomeSettings.adminsObeyWarmsCools && HomePermissions.isAdmin(player)) {
+            home.warp(player, plugin.getServer());
+            return;
+        }
+        
         if (HomeSettings.warmUp > 0) {
             if (players.containsKey(player.getName())) {
                 plugin.getServer().getScheduler().cancelTask(players.get(player.getName()));

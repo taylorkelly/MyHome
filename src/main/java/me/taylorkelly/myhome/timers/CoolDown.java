@@ -1,6 +1,7 @@
 package me.taylorkelly.myhome.timers;
 
 import java.util.HashMap;
+import me.taylorkelly.myhome.HomePermissions;
 
 import me.taylorkelly.myhome.HomeSettings;
 
@@ -13,6 +14,9 @@ public class CoolDown {
     private static HashMap<String, Integer> players = new HashMap<String, Integer>();
 
     public static void addPlayer(Player player, Plugin plugin) {
+        if (!HomeSettings.adminsObeyWarmsCools && HomePermissions.isAdmin(player)) {
+            return;
+        }
         if (HomeSettings.coolDown > 0) {
             if (players.containsKey(player.getName())) {
                 plugin.getServer().getScheduler().cancelTask(players.get(player.getName()));
