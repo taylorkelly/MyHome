@@ -37,6 +37,9 @@ public class MyHome extends JavaPlugin {
         name = this.getDescription().getName();
         version = this.getDescription().getVersion();
 
+        HomeSettings.initialize(getDataFolder());
+
+
         updater = new Updater();
         try {
             updater.check();
@@ -64,7 +67,6 @@ public class MyHome extends JavaPlugin {
 
         HomePermissions.initialize(getServer());
         HomeHelp.initialize(this);
-        HomeSettings.initialize(getDataFolder());
 
         getServer().getPluginManager().registerEvent(Event.Type.PLAYER_JOIN, playerListener, Priority.Monitor, this);
         getServer().getPluginManager().registerEvent(Event.Type.PLAYER_RESPAWN, playerListener, Priority.Monitor, this);
