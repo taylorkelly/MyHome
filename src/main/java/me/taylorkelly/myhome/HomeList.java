@@ -11,6 +11,7 @@ import me.taylorkelly.myhome.timers.WarmUp;
 
 import org.bukkit.*;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
 public class HomeList {
 
@@ -46,15 +47,15 @@ public class HomeList {
         homeList.put(warp.name, warp);
     }
 
-    public void warpTo(String name, Player player) {
+    public void warpTo(String name, Player player, Plugin plugin) {
         MatchList matches = this.getMatches(name, player);
         name = matches.getMatch(name);
         if (homeList.containsKey(name)) {
             Home warp = homeList.get(name);
             if (warp.playerCanWarp(player)) {
                 if (CoolDown.playerHasCooled(player)) {
-                    WarmUp.addPlayer(player, warp, server);
-                    CoolDown.addPlayer(player);
+                    WarmUp.addPlayer(player, warp, plugin);
+                    CoolDown.addPlayer(player, plugin);
                 } else {
                     player.sendMessage(ChatColor.RED + "You need to wait for the cooldown of " + HomeSettings.coolDown + " secs");
                 }
@@ -66,11 +67,11 @@ public class HomeList {
         }
     }
 
-    public void sendPlayerHome(Player player) {
+    public void sendPlayerHome(Player player, Plugin plugin) {
         if (homeList.containsKey(player.getName())) {
             if (CoolDown.playerHasCooled(player)) {
-                WarmUp.addPlayer(player, homeList.get(player.getName()), server);
-                CoolDown.addPlayer(player);
+                WarmUp.addPlayer(player, homeList.get(player.getName()), plugin);
+                CoolDown.addPlayer(player, plugin);
             } else {
                 player.sendMessage(ChatColor.RED + "You need to wait for the cooldown of " + HomeSettings.coolDown + " secs");
             }

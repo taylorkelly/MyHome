@@ -18,9 +18,9 @@ public class ConnectionManager {
             conn.setAutoCommit(false);
             return conn;
         } catch (SQLException ex) {
-            MyHome.severe("SQLite exception on initialize", ex);
+            HomeLogger.severe("SQLite exception on initialize", ex);
         } catch (ClassNotFoundException ex) {
-            MyHome.severe("You need the SQLite library.", ex);
+            HomeLogger.severe("You need the SQLite library.", ex);
         }
         return conn;
     }
@@ -34,7 +34,7 @@ public class ConnectionManager {
             try {
                 conn.close();
             } catch (SQLException ex) {
-                MyHome.severe("Error on Connection close", ex);
+                HomeLogger.severe("Error on Connection close", ex);
             }
         }
     }

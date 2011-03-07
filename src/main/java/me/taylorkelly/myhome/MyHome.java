@@ -6,8 +6,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.sql.Connection;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import me.taylorkelly.myhome.griefcraft.Updater;
 
@@ -22,14 +20,12 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class MyHome extends JavaPlugin {
 
-    private MHEntityListener entityListener;
     private MHPlayerListener playerListener;
     private HomeList homeList;
     private boolean warning = false;
     public String name;
     public String version;
     private Updater updater;
-    public static final Logger log = Logger.getLogger("Minecraft");
 
     @Override
     public void onDisable() {
@@ -57,7 +53,7 @@ public class MyHome extends JavaPlugin {
 
         Connection conn = ConnectionManager.initialize(this.getDataFolder());
         if (conn == null) {
-            severe("Could not establish SQL connection. Disabling MyHome");
+            HomeLogger.severe("Could not establish SQL connection. Disabling MyHome");
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
@@ -65,7 +61,6 @@ public class MyHome extends JavaPlugin {
 
         homeList = new HomeList(getServer());
         playerListener = new MHPlayerListener(homeList, getServer());
-        entityListener = new MHEntityListener(homeList);
 
         HomePermissions.initialize(getServer());
         HomeHelp.initialize(this);
@@ -74,7 +69,7 @@ public class MyHome extends JavaPlugin {
         getServer().getPluginManager().registerEvent(Event.Type.PLAYER_JOIN, playerListener, Priority.Monitor, this);
         getServer().getPluginManager().registerEvent(Event.Type.PLAYER_RESPAWN, playerListener, Priority.Monitor, this);
 
-        log.info(name + " " + version + " enabled");
+        HomeLogger.info(name + " " + version + " enabled");
     }
 
     private void updateFiles(File oldDatabase, File newDatabase) {
@@ -87,7 +82,7 @@ public class MyHome extends JavaPlugin {
         try {
             newDatabase.createNewFile();
         } catch (IOException ex) {
-            severe("Could not create new database file", ex);
+            HomeLogger.severe("Could not create new database file", ex);
         }
         copyFile(oldDatabase, newDatabase);
     }
@@ -110,7 +105,6 @@ public class MyHome extends JavaPlugin {
                 to.write(buffer, 0, bytesRead);
             }
         } catch (IOException ex) {
-            Logger.getLogger(MyHome.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             if (from != null) {
                 try {
@@ -139,7 +133,7 @@ public class MyHome extends JavaPlugin {
                  */
                 if (split.length == 0 && HomePermissions.home(player)) {
                     if (homeList.playerHasHome(player)) {
-                        homeList.sendPlayerHome(player);
+                        homeList.sendPlayerHome(player, this);
                     } else {
                         player.sendMessage(ChatColor.RED + "You have no home :(");
                         player.sendMessage("Use: " + ChatColor.RED + "/home set" + ChatColor.WHITE + " to set a home");
@@ -254,7 +248,7 @@ public class MyHome extends JavaPlugin {
                 } else if (split.length == 1 && HomePermissions.homeOthers(player)) {
                     // TODO ChunkLoading
                     String playerName = split[0];
-                    homeList.warpTo(playerName, player);
+                    homeList.warpTo(playerName, player, this);
                 } else {
                     return false;
                 }
@@ -268,14 +262,5 @@ public class MyHome extends JavaPlugin {
         if (HomeSettings.compassPointer) {
             player.setCompassTarget(location);
         }
-    }
-
-    public static void severe(String string, Exception ex) {
-        log.log(Level.SEVERE, "[MYHOME]" + string, ex);
-
-    }
-
-    public static void severe(String string) {
-        log.log(Level.SEVERE, "[MYHOME]" + string);
     }
 }

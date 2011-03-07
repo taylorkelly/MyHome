@@ -1,8 +1,6 @@
 package me.taylorkelly.myhome.timers;
 
 import java.util.HashMap;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import me.taylorkelly.myhome.Home;
 import me.taylorkelly.myhome.HomeSettings;
@@ -10,24 +8,23 @@ import me.taylorkelly.myhome.HomeSettings;
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
 public class WarmUp {
-    private static HashMap<String, Timer> players = new HashMap<String, Timer>();
+    private static HashMap<String, Integer> players = new HashMap<String, Integer>();
 
-    public static void addPlayer(Player player, Home home, Server server) {
-        if (HomeSettings.coolDown > 0) {
+    public static void addPlayer(Player player, Home home, Plugin plugin) {
+        if (HomeSettings.warmUp > 0) {
             if (players.containsKey(player.getName())) {
-                Timer timer = players.get(player.getName());
-                timer.cancel();
+                plugin.getServer().getScheduler().cancelTask(players.get(player.getName()));
             }
             if (HomeSettings.warmUpNotify && HomeSettings.warmUp > 0) {
                 player.sendMessage(ChatColor.RED + "You will have to warm up for " + HomeSettings.warmUp + " secs");
             }
-            Timer timer = new Timer();
-            timer.schedule(new WarmTask(player, home, server), HomeSettings.warmUp*1000, HomeSettings.warmUp*1000);
-            players.put(player.getName(), timer);
+            int taskIndex = plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new WarmTask(player, home, plugin.getServer()), HomeSettings.warmUp*20);
+            players.put(player.getName(), taskIndex);
         } else {
-            home.warp(player, server);
+            home.warp(player, plugin.getServer());
         }
     }
 
@@ -41,7 +38,7 @@ public class WarmUp {
         home.warp(player, server);
     }
 
-    private static class WarmTask extends TimerTask {
+    private static class WarmTask implements Runnable {
         private Player player;
         private Home home;
         private Server server;
@@ -55,7 +52,6 @@ public class WarmUp {
         public void run() {
             sendPlayer(player, home, server);
             players.remove(player.getName());
-            this.cancel();
         }
     }
 }

@@ -1,27 +1,25 @@
 package me.taylorkelly.myhome.timers;
 
 import java.util.HashMap;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import me.taylorkelly.myhome.HomeSettings;
 
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
 public class CoolDown {
-    private static HashMap<String, Timer> players = new HashMap<String, Timer>();
 
-    public static void addPlayer(Player player) {
+    private static HashMap<String, Integer> players = new HashMap<String, Integer>();
+
+    public static void addPlayer(Player player, Plugin plugin) {
         if (HomeSettings.coolDown > 0) {
             if (players.containsKey(player.getName())) {
-                Timer timer = players.get(player.getName());
-                timer.cancel();
+                plugin.getServer().getScheduler().cancelTask(players.get(player.getName()));
             }
 
-            Timer timer = new Timer();
-            timer.schedule(new CoolTask(player), HomeSettings.coolDown*1000, HomeSettings.coolDown*1000);
-            players.put(player.getName(), timer);
+            int taskIndex = plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new CoolTask(player), HomeSettings.coolDown * 20);
+            players.put(player.getName(), taskIndex);
         }
     }
 
@@ -31,7 +29,6 @@ public class CoolDown {
 
     public static int timeLeft(Player player) {
         if (players.containsKey(player.getName())) {
-            Timer timer = players.get(player.getName());
             // TODO
             return 0;
         } else {
@@ -39,7 +36,8 @@ public class CoolDown {
         }
     }
 
-    private static class CoolTask extends TimerTask {
+    private static class CoolTask implements Runnable {
+
         private Player player;
 
         public CoolTask(Player player) {
@@ -47,10 +45,10 @@ public class CoolDown {
         }
 
         public void run() {
-            if (HomeSettings.coolDownNotify)
+            if (HomeSettings.coolDownNotify) {
                 player.sendMessage(ChatColor.AQUA + "You have cooled down, feel free to /home");
+            }
             players.remove(player.getName());
-            this.cancel();
         }
     }
 }
